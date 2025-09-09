@@ -1,752 +1,528 @@
-<!doctype html>
-<html lang="et">
+<!DOCTYPE html>
+<html lang="et" class="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>R‑kalender</title>
-  <meta name="theme-color" content="#111827" />
-  <meta name="description" content="R‑kalender — lihtne 7-päeva nädalakalender teavitustega" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>R Kalender</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tone.js for custom sound -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
 
-  <!-- Manifest lisatakse dünaamiliselt Blobina -->
-  <link id="manifestLink" rel="manifest" href="">
+    <!-- Web App Manifest (for "Add to Home Screen") -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlIgS2FsZW5kZXIiLAogICJzaG9ydF9uYW1lIjogIlJLYWxlbmRlciIsCiAgImRlc2NyaXB0aW9uIjogIkhlcHBmbiB3ZWVrbHkgcGxhbm5lciIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDAwMDAwL2ZmZmZmZj90ZXh0PVLwn5OKIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDAwMDAwL2ZmZmZmZj90ZXh0PVLwn5OKIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXSwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJ0aGVtZV9jb2xvciI6ICIjMWYyOTM3IiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGUxNzI1Igp9">
 
-  <!-- Tab/logo ja Apple ikoon (sinu pilt) -->
-  <link rel="icon" href="https://i.pinimg.com/1200x/7e/fc/70/7efc700398ef96d975700984b6c4ed63.jpg" sizes="any" />
-  <link rel="apple-touch-icon" href="https://i.pinimg.com/1200x/7e/fc/70/7efc700398ef96d975700984b6c4ed63.jpg" />
-
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-  <style>
-  :root{
-    --bg:#0b1220;
-    --card:#121a2b;
-    --text:#e5e7eb;
-    --muted:#9ca3af;
-    --primary:#2563eb;
-    --border:#243044;
-    --chip:#1e293b;
-    --safe-top: env(safe-area-inset-top);
-    --safe-bottom: env(safe-area-inset-bottom);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    font-family:system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
-    background:linear-gradient(180deg,#0b1220,#0a1020 60%,#0a0f1d);
-    color:var(--text);
-    padding-bottom:var(--safe-bottom);
-    -webkit-tap-highlight-color: rgba(255,255,255,0);
-  }
-
-  .app-header{
-    position:sticky; top:0; z-index:20;
-    background:rgba(11,18,32,.8); backdrop-filter: blur(10px);
-    border-bottom:1px solid var(--border);
-    padding:calc(12px + var(--safe-top)) 12px 10px;
-  }
-  .header-row{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-  }
-  .branding{display:flex; align-items:center; gap:10px}
-  .app-emoji{font-size:28px}
-  h1{font-size:20px; margin:0}
-  .header-actions{display:flex; gap:8px}
-
-  .week-banner{
-    display:flex; justify-content:space-between; align-items:center; gap:8px;
-    padding:8px 0;
-  }
-  .banner-left,.banner-right{flex:1; display:flex; align-items:center; gap:8px}
-  #weekNote{width:100%; padding:12px; border-radius:12px; border:1px solid var(--border); background:#0f1627; color:var(--text); font-size:16px}
-  .emoji-select{padding:10px; border-radius:12px; border:1px solid var(--border); background:#0f1627; color:var(--text); font-size:16px}
-  .subhead{display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:12px; color:var(--muted)}
-
-  main{padding:12px; display:grid; gap:12px; max-width:900px; margin:0 auto}
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:16px; padding:12px;
-  }
-  h2{margin:8px 0 12px; font-size:16px}
-
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-  .grid .full{grid-column:1/-1}
-  label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
-  input[type="text"], input[type="time"], select, textarea{
-    width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
-    background:#0f1627; color:var(--text); font-size:16px; min-height:44px;
-  }
-  textarea{resize:vertical}
-  .btn{
-    appearance:none; border:1px solid var(--border); background:#0f1627; color:var(--text);
-    border-radius:12px; padding:12px 16px; cursor:pointer; font-size:16px; min-height:44px;
-  }
-  .btn.primary{background:var(--primary); border-color:#1d4ed8}
-  .btn:active{transform:translateY(1px)}
-  .icon-btn{
-    background:transparent; border:0; color:var(--text); cursor:pointer; font-size:18px;
-    width:44px; height:44px; display:inline-grid; place-items:center; border-radius:8px;
-  }
-  .icon-btn:active{background:#0f1627}
-
-  .colors{display:flex; flex-wrap:wrap; gap:8px}
-  .color-chip{
-    display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:999px;
-    background:var(--chip); border:1px solid var(--border); cursor:pointer; user-select:none;
-    min-height:40px;
-  }
-  .color-chip input{display:none}
-  .color-chip span{font-size:13px; color:var(--muted)}
-  .color-chip.red{--c:#ef4444}
-  .color-chip.yellow{--c:#f59e0b}
-  .color-chip.blue{--c:#3b82f6}
-  .color-chip.green{--c:#10b981}
-  .color-chip.purple{--c:#a855f7}
-  .color-chip.brown{--c:#8b5e3c}
-  .color-chip.pink{--c:#ec4899}
-  .color-chip.orange{--c:#f97316}
-  .color-chip::before{content:""; width:14px; height:14px; border-radius:50%; background:var(--c); display:inline-block}
-
-  .calendar{ display:grid; gap:8px; }
-  .day-col{
-    border:1px solid var(--border); border-radius:12px; padding:8px;
-    background:#0f1627;
-  }
-  .day-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px}
-  .day-name{font-weight:600}
-  .day-date{font-size:12px; color:var(--muted)}
-  .event-list{display:flex; flex-direction:column; gap:6px}
-
-  .event-item{
-    display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;
-    padding:10px; border:1px solid var(--border); border-radius:10px; background:#0c1323;
-  }
-  .event-item .dot{width:12px; height:12px; border-radius:50%; display:inline-block}
-  .event-item .line1{display:flex; gap:8px; align-items:center}
-  .event-item .time{font-variant-numeric:tabular-nums; color:#cbd5e1}
-  .event-item .title{font-weight:600}
-  .event-item .notes{color:var(--muted); font-size:12px}
-
-  .actions{display:flex; gap:8px; justify-content:flex-end}
-  .ml{margin-left:16px}
-
-  .footer{padding:20px; padding-bottom:calc(20px + var(--safe-bottom)); text-align:center; color:var(--muted)}
-
-  @media (min-width:720px){
-    .calendar{grid-template-columns:repeat(7,1fr)}
-  }
-  @media (max-width:719px){
-    .calendar{grid-template-columns:1fr}
-    .grid{grid-template-columns:1fr}
-    .header-actions .btn{padding:10px 12px}
-    h1{font-size:18px}
-  }
-
-  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0}
-  </style>
+    <style>
+        /* Custom styles for better look and feel */
+        body {
+            -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+        }
+        .calendar-grid {
+            grid-template-columns: 2.5rem repeat(7, 1fr);
+        }
+        .emoji-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 0.5rem;
+        }
+        .color-picker span {
+            transition: transform 0.2s ease;
+        }
+        .color-picker span.selected {
+            transform: scale(1.2);
+            outline: 3px solid #3b82f6; /* blue-500 */
+        }
+        html.dark .color-picker span.selected {
+             outline-color: #60a5fa; /* blue-400 */
+        }
+        .emoji-picker button {
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .emoji-picker button.selected {
+            outline: 3px solid #3b82f6; /* blue-500 */
+            border-radius: 8px;
+            transform: scale(1.1);
+        }
+        html.dark .emoji-picker button.selected {
+            outline-color: #60a5fa; /* blue-400 */
+        }
+        .day-header.today {
+            background-color: #fbbf24; /* Amber 400 */
+            color: #1f2937;
+        }
+        html.dark .day-header.today {
+            background-color: #f59e0b; /* Amber 500 */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e5e7eb; /* gray-200 */
+            border-radius: 10px;
+        }
+         html.dark ::-webkit-scrollbar-track {
+            background: #1e293b; /* slate-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9ca3af; /* gray-400 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+    </style>
 </head>
-<body>
-  <header class="app-header">
-    <div class="header-row">
-      <div class="branding">
-        <span class="app-emoji" id="weekEmoji">📅</span>
-        <h1>R‑kalender</h1>
-      </div>
-      <div class="header-actions">
-        <button id="btnNotify" class="btn primary">Luba teavitused</button>
-        <button id="btnInstall" class="btn">Lisa avaekraanile</button>
-      </div>
-    </div>
-    <div class="week-banner">
-      <div class="banner-left">
-        <label for="weekEmojiSelect" class="sr-only">Nädala emootikon</label>
-        <select id="weekEmojiSelect" class="emoji-select" title="Nädala emootikon">
-          <option value="💧">💧 Vesi</option>
-          <option value="🎉">🎉 Pidu</option>
-          <option value="🍷">🍷 Vein</option>
-          <option value="🍦">🍦 Jäätis</option>
-          <option value="🍔">🍔 Burger</option>
-          <option value="✈️">✈️ Lennuk</option>
-          <option value="🏠">🏠 Maja</option>
-          <option value="🏋️">🏋️ Hantel</option>
-          <option value="🍆">🍆 Baklažaan</option>
-          <option value="🏙️">🏙️ Linn</option>
-          <option value="⚽">⚽ Jalgpall</option>
-          <option value="🪁">🪁 Lohe</option>
-          <option value="⚓">⚓ Ankur</option>
-          <option value="✝️">✝️ Rist</option>
-          <option value="📚">📚 Raamat</option>
-          <option value="🏢">🏢 Kontor</option>
-          <option value="🏫">🏫 Kool</option>
-        </select>
-      </div>
-      <div class="banner-right">
-        <input id="weekNote" type="text" placeholder="Nädala märksõna / märkus…" />
-      </div>
-    </div>
-    <div class="subhead">
-      <div id="weekRange"></div>
-      <div class="sound-toggle">
-        <label><input type="checkbox" id="soundOn"> Mängi eristuvat heli, kui rakendus on avatud</label>
-      </div>
-    </div>
-  </header>
+<body class="bg-gray-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen overflow-x-hidden font-sans transition-colors duration-300">
 
-  <main>
-    <section class="card">
-      <h2>Lisa tegevus</h2>
-      <form id="eventForm">
-        <div class="grid">
-          <div>
-            <label for="title">Pealkiri</label>
-            <input id="title" type="text" required placeholder="Nt Treening / Koosolek" />
-          </div>
-          <div>
-            <label for="day">Päev</label>
-            <select id="day" required></select>
-          </div>
-          <div>
-            <label for="start">Algus</label>
-            <input id="start" type="time" step="300" required />
-          </div>
-          <div>
-            <label for="end">Lõpp (valikuline)</label>
-            <input id="end" type="time" step="300" />
-          </div>
-          <div class="full">
-            <label>Värv</label>
-            <div class="colors" id="colorGroup" role="group" aria-label="Värvivalik">
-              <label class="color-chip red"><input type="radio" name="color" value="red" checked /><span>punane</span></label>
-              <label class="color-chip yellow"><input type="radio" name="color" value="yellow" /><span>kollane</span></label>
-              <label class="color-chip blue"><input type="radio" name="color" value="blue" /><span>sinine</span></label>
-              <label class="color-chip green"><input type="radio" name="color" value="green" /><span>roheline</span></label>
-              <label class="color-chip purple"><input type="radio" name="color" value="purple" /><span>lilla</span></label>
-              <label class="color-chip brown"><input type="radio" name="color" value="brown" /><span>pruun</span></label>
-              <label class="color-chip pink"><input type="radio" name="color" value="pink" /><span>roosa</span></label>
-              <label class="color-chip orange"><input type="radio" name="color" value="orange" /><span>oranž</span></label>
+    <div id="app-container" class="max-w-4xl mx-auto p-2 sm:p-4">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">R Kalender</h1>
+            <div class="flex items-center space-x-2">
+                <span class="text-sm">Hele</span>
+                <button id="theme-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-300 dark:bg-slate-600 focus:outline-none">
+                    <span id="theme-toggle-indicator" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1 dark:translate-x-6"></span>
+                </button>
+                <span class="text-sm">Tume</span>
             </div>
-          </div>
-          <div class="full">
-            <label><input type="checkbox" id="notifyStart" checked /> Teavita alguses</label>
-            <label class="ml"><input type="checkbox" id="notifyEnd" /> Teavita lõpus</label>
-          </div>
-          <div class="full">
-            <label for="notes">Märkmed (valikuline)</label>
-            <textarea id="notes" rows="2" placeholder="Lühikirjeldus"></textarea>
-          </div>
-          <div class="full actions">
-            <button class="btn primary" type="submit">Lisa</button>
-            <button class="btn" type="button" id="resetForm">Tühjenda</button>
-          </div>
+        </header>
+
+        <!-- Calendar -->
+        <div id="calendar" class="overflow-x-auto">
+            <div class="calendar-grid grid gap-1">
+                <!-- Headers will be generated by JS -->
+            </div>
         </div>
-      </form>
-    </section>
 
-    <section class="card">
-      <h2>Nädala tegevused</h2>
-      <div id="calendar" class="calendar"></div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <small>Rakendus töötab ka võrguühenduseta. Teavitused toimivad parimal saadaoleval viisil.</small>
-  </footer>
-
-  <template id="eventItemTpl">
-    <div class="event-item">
-      <div class="left">
-        <span class="dot"></span>
-      </div>
-      <div class="mid">
-        <div class="line1">
-          <span class="time"></span>
-          <span class="title"></span>
+        <!-- Action Buttons -->
+        <div class="mt-4 text-center flex justify-center items-center space-x-4">
+            <button id="delete-row-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-transform transform hover:scale-105 hidden">
+                - Kustuta Rida
+            </button>
+            <button id="add-row-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                + Lisa Rida
+            </button>
         </div>
-        <div class="line2 notes"></div>
-      </div>
-      <div class="right">
-        <button class="icon-btn edit" title="Muuda">✏️</button>
-        <button class="icon-btn del" title="Kustuta">🗑️</button>
-      </div>
     </div>
-  </template>
 
-  <script type="module">
-  // === Manifest (Blobina) ===
-  (function attachManifest(){
-    const manifest = {
-      name: "R‑kalender",
-      short_name: "R‑kalender",
-      start_url: "./",
-      display: "standalone",
-      background_color: "#0b1220",
-      theme_color: "#111827",
-      description: "Lihtne 7-päeva nädalakalender teavitustega.",
-      icons: [
-        {
-          src: "https://i.pinimg.com/1200x/7e/fc/70/7efc700398ef96d975700984b6c4ed63.jpg",
-          type: "image/jpeg",
-          sizes: "512x512",
-          purpose: "any"
-        }
-      ]
-    };
-    const url = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" }));
-    const link = document.getElementById('manifestLink');
-    link.setAttribute('href', url);
-  })();
+    <!-- Modal for adding/editing events -->
+    <div id="event-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-sm p-6 transform transition-all scale-95 opacity-0" id="modal-content">
+            <h2 class="text-xl font-bold mb-4" id="modal-title">Lisa Sündmus</h2>
+            
+            <div class="space-y-4">
+                <!-- Event Text -->
+                <div>
+                    <label for="event-text" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Tegevus</label>
+                    <input type="text" id="event-text" placeholder="Nt: Jõusaal" class="mt-1 block w-full bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <!-- Time -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="event-start-time" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Algus</label>
+                        <input type="time" id="event-start-time" step="300" class="mt-1 block w-full bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="event-end-time" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Lõpp</label>
+                        <input type="time" id="event-end-time" step="300" class="mt-1 block w-full bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
 
-  // === App loogika (endine app.js) ===
-  const $ = sel => document.querySelector(sel);
-  const $$ = sel => Array.from(document.querySelectorAll(sel));
+                <!-- Notification Time -->
+                 <div>
+                    <label for="notification-time" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Teavituse aeg</label>
+                    <input type="time" id="notification-time" step="300" class="mt-1 block w-full bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
 
-  const state = {
-    events: [],
-    settings: {
-      weekEmoji: '📅',
-      weekNote: '',
-      soundOn: false,
-    },
-    installPromptEvent: null,
-    timers: new Map(),
-  };
+                <!-- Color Picker -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Värv</label>
+                    <div id="color-picker" class="mt-2 flex justify-around p-2 bg-gray-100 dark:bg-slate-700 rounded-lg">
+                        <!-- Colors will be generated by JS -->
+                    </div>
+                </div>
 
-  const DAYS_ET = ['Esmaspäev','Teisipäev','Kolmapäev','Neljapäev','Reede','Laupäev','Pühapäev'];
-  const pad2 = n => String(n).padStart(2,'0');
+                <!-- Emoji Picker -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Ikoon</label>
+                    <div id="emoji-picker" class="mt-2 p-2 bg-gray-100 dark:bg-slate-700 rounded-lg max-h-32 overflow-y-auto emoji-picker-grid">
+                        <!-- Emojis will be generated by JS -->
+                    </div>
+                </div>
+            </div>
 
-  function getTodayLocal() { return new Date(); }
-  function getWeekStart(d = getTodayLocal()){
-    const dt = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const day = (dt.getDay()+6)%7; // 0=Mon
-    dt.setDate(dt.getDate()-day);
-    dt.setHours(0,0,0,0);
-    return dt;
-  }
-  function dateToISO(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
-  function isoToDate(iso){
-    const [y,m,da] = iso.split('-').map(Number);
-    const d = new Date(y, m-1, da);
-    d.setHours(0,0,0,0);
-    return d;
-  }
+            <!-- Modal Actions -->
+            <div class="mt-6 flex justify-between">
+                <button id="delete-event-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors hidden">Kustuta</button>
+                <div class="flex-grow flex justify-end space-x-3">
+                     <button id="cancel-event-btn" class="bg-gray-300 hover:bg-gray-400 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-800 dark:text-slate-200 font-bold py-2 px-4 rounded-md shadow-sm transition-colors">Tühista</button>
+                    <button id="save-event-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors">Salvesta</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  function load(){
-    const ws = dateToISO(getWeekStart());
-    const evRaw = localStorage.getItem('rk_events_'+ws);
-    state.events = evRaw ? JSON.parse(evRaw) : [];
-    const stRaw = localStorage.getItem('rk_settings_'+ws);
-    if (stRaw) Object.assign(state.settings, JSON.parse(stRaw));
-  }
-  function save(){
-    const ws = dateToISO(getWeekStart());
-    localStorage.setItem('rk_events_'+ws, JSON.stringify(state.events));
-    localStorage.setItem('rk_settings_'+ws, JSON.stringify(state.settings));
-  }
 
-  function minutesFromTimeStr(t){
-    if (!t) return null;
-    const [h,m] = t.split(':').map(Number);
-    return h*60 + m;
-  }
-  function timeStrFromMinutes(min){
-    const h = Math.floor(min/60), m = min%60;
-    return \`\${pad2(h)}:\${pad2(m)}\`;
-  }
-  function dayDateOfWeek(dayIndex){
-    const ws = getWeekStart();
-    const d = new Date(ws);
-    d.setDate(ws.getDate()+dayIndex);
-    return d;
-  }
-  function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURATION ---
+            const COLORS = {
+                red: 'bg-red-500',
+                yellow: 'bg-yellow-400',
+                blue: 'bg-blue-500',
+                green: 'bg-green-500',
+                purple: 'bg-purple-500',
+                brown: 'bg-amber-800',
+                pink: 'bg-pink-400',
+                orange: 'bg-orange-500',
+            };
+            const EMOJIS = ['💧', '🥳', '🍷', '🍦', '🍔', '✈️', '🏠', '🏋️', '🍆', '🏙️', '⚽️', '🪁', '⚓', '✝️', '📖', '🏢', '🏫', '🏃', '🚗', '🛒', '💼', '🎣', '🍼', '💻', '📱', '☕'];
+            const WEEKDAYS = ['P', 'E', 'T', 'K', 'N', 'R', 'L'];
+            const INITIAL_ROWS = 5;
 
-  function buildDaySelect(){
-    const sel = $('#day');
-    sel.innerHTML = '';
-    for (let i=0;i<7;i++){
-      const dd = dayDateOfWeek(i);
-      const opt = document.createElement('option');
-      opt.value = String(i);
-      opt.textContent = \`\${DAYS_ET[i]} (\${dd.getDate()}.\${dd.getMonth()+1})\`;
-      if (sameDay(dd, getTodayLocal())) opt.selected = true;
-      sel.appendChild(opt);
-    }
-  }
-  function renderWeekRange(){
-    const ws = getWeekStart();
-    const we = new Date(ws); we.setDate(ws.getDate()+6);
-    $('#weekRange').textContent = \`\${ws.getDate()}.\${ws.getMonth()+1}.\${ws.getFullYear()} – \${we.getDate()}.\${we.getMonth()+1}.\${we.getFullYear()}\`;
-  }
+            // --- STATE MANAGEMENT ---
+            let state = {
+                theme: 'dark',
+                events: {},
+                rows: INITIAL_ROWS,
+            };
 
-  function renderCalendar(){
-    const cal = $('#calendar');
-    cal.innerHTML = '';
-    const wsISO = dateToISO(getWeekStart());
-    const evs = state.events
-      .filter(e => e.weekStartISO === wsISO)
-      .slice()
-      .sort((a,b)=> a.dayIndex-b.dayIndex || a.startMin-b.startMin);
+            // --- DOM ELEMENTS ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeToggleIndicator = document.getElementById('theme-toggle-indicator');
+            const calendarGrid = document.querySelector('.calendar-grid');
+            const addRowBtn = document.getElementById('add-row-btn');
+            const deleteRowBtn = document.getElementById('delete-row-btn');
+            const modal = document.getElementById('event-modal');
+            const modalContent = document.getElementById('modal-content');
+            const saveBtn = document.getElementById('save-event-btn');
+            const cancelBtn = document.getElementById('cancel-event-btn');
+            const deleteBtn = document.getElementById('delete-event-btn');
+            const colorPicker = document.getElementById('color-picker');
+            const emojiPicker = document.getElementById('emoji-picker');
+            const eventText = document.getElementById('event-text');
+            const eventStartTime = document.getElementById('event-start-time');
+            const eventEndTime = document.getElementById('event-end-time');
+            const notificationTime = document.getElementById('notification-time');
 
-    for (let i=0;i<7;i++){
-      const dayWrap = document.createElement('div');
-      dayWrap.className = 'day-col';
-      const head = document.createElement('div');
-      head.className = 'day-head';
-      const d = dayDateOfWeek(i);
-      const name = document.createElement('div'); name.className='day-name'; name.textContent = DAYS_ET[i];
-      const date = document.createElement('div'); date.className='day-date'; date.textContent = \`\${d.getDate()}.\${d.getMonth()+1}\`;
-      head.append(name,date);
-      const list = document.createElement('div');
-      list.className = 'event-list';
-      const dayItems = evs.filter(e=>e.dayIndex===i);
-      for(const e of dayItems){
-        const tpl = document.getElementById('eventItemTpl');
-        const node = tpl.content.firstElementChild.cloneNode(true);
-        node.dataset.id = e.id;
-        node.querySelector('.dot').style.background = colorToHex(e.color);
-        const t1 = node.querySelector('.time');
-        const timeStr = e.endMin!=null ? \`\${timeStrFromMinutes(e.startMin)}–\${timeStrFromMinutes(e.endMin)}\` : \`\${timeStrFromMinutes(e.startMin)}\`;
-        t1.textContent = timeStr;
-        node.querySelector('.title').textContent = e.title;
-        const notes = node.querySelector('.notes');
-        notes.textContent = e.notes || '';
-        node.querySelector('.edit').addEventListener('click', ()=>editEvent(e.id));
-        node.querySelector('.del').addEventListener('click', ()=>deleteEvent(e.id));
-        list.appendChild(node);
-      }
-      dayWrap.append(head, list);
-      cal.appendChild(dayWrap);
-    }
-  }
+            let currentEditingSlot = null;
+            let scheduledNotifications = {};
 
-  function colorToHex(c){
-    switch(c){
-      case 'red': return '#ef4444';
-      case 'yellow': return '#f59e0b';
-      case 'blue': return '#3b82f6';
-      case 'green': return '#10b981';
-      case 'purple': return '#a855f7';
-      case 'brown': return '#8b5e3c';
-      case 'pink': return '#ec4899';
-      case 'orange': return '#f97316';
-      default: return '#64748b';
-    }
-  }
+            // --- INITIALIZATION ---
+            function init() {
+                loadState();
+                setupTheme();
+                setupPickers();
+                renderCalendar();
+                setupEventListeners();
+                
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    if (!localStorage.getItem('notificationPermissionRequested')) {
+                        requestNotificationPermission();
+                        localStorage.setItem('notificationPermissionRequested', 'true');
+                    }
+                }
+            }
+            
+            // --- THEME ---
+            function setupTheme() {
+                if (state.theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    themeToggleIndicator.classList.add('dark:translate-x-6');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    themeToggleIndicator.classList.remove('dark:translate-x-6');
+                }
+            }
 
-  async function requestNotificationPermission(){
-    if (!('Notification' in window)) {
-      alert('Teavitused ei ole selles brauseris toetatud.');
-      return;
-    }
-    const res = await Notification.requestPermission();
-    if (res !== 'granted'){
-      alert('Teavitused keelati. Saad lubada brauseri seadetes.');
-    }
-    updateNotifyBtn();
-  }
+            function toggleTheme() {
+                state.theme = state.theme === 'dark' ? 'light' : 'dark';
+                document.documentElement.classList.toggle('dark');
+                themeToggleIndicator.classList.toggle('dark:translate-x-6');
+                saveState();
+            }
 
-  function supportsScheduledNotifications(){
-    return ('serviceWorker' in navigator) && ('showNotification' in ServiceWorkerRegistration.prototype) && ('TimestampTrigger' in window);
-  }
-  function scheduleAll(){
-    clearAllTimers();
-    const wsISO = dateToISO(getWeekStart());
-    for (const e of state.events.filter(ev=>ev.weekStartISO===wsISO)){
-      scheduleForEvent(e);
-    }
-  }
-  function scheduleForEvent(e){
-    const startDate = dateForEventTime(e.dayIndex, e.startMin);
-    const endDate = e.endMin!=null ? dateForEventTime(e.dayIndex, e.endMin) : null;
+            // --- PERSISTENCE (LocalStorage) ---
+            function saveState() {
+                localStorage.setItem('rCalendarState', JSON.stringify(state));
+            }
 
-    if (supportsScheduledNotifications()){
-      navigator.serviceWorker.ready.then(reg=>{
-        if (e.notifyStart) {
-          reg.showNotification('R‑kalender', {
-            body: buildBody(e, 'Algus: ' + timeStrFromMinutes(e.startMin)),
-            tag: \`start-\${e.id}\`,
-            showTrigger: new TimestampTrigger(startDate.getTime()),
-            data: { eventId: e.id, type: 'start' }
-          }).catch(console.warn);
-        }
-        if (e.notifyEnd && endDate) {
-          reg.showNotification('R‑kalender', {
-            body: buildBody(e, 'Lõpp: ' + timeStrFromMinutes(e.endMin)),
-            tag: \`end-\${e.id}\`,
-            showTrigger: new TimestampTrigger(endDate.getTime()),
-            data: { eventId: e.id, type: 'end' }
-          }).catch(console.warn);
-        }
-      });
-    } else {
-      if (e.notifyStart) setLocalTimer(\`start-\${e.id}\`, startDate, ()=>showNow(e,'start'));
-      if (e.notifyEnd && endDate) setLocalTimer(\`end-\${e.id}\`, endDate, ()=>showNow(e,'end'));
-    }
-  }
-  function buildBody(e, prefix){
-    const parts = [prefix, e.title];
-    if (e.notes) parts.push(e.notes);
-    const d = dayDateOfWeek(e.dayIndex);
-    parts.push(\`\${DAYS_ET[e.dayIndex]} \${d.getDate()}.\${d.getMonth()+1}\`);
-    return parts.join(' • ');
-  }
-  function dateForEventTime(dayIndex, minutes){
-    const d = dayDateOfWeek(dayIndex);
-    const h = Math.floor(minutes/60), m = minutes%60;
-    d.setHours(h, m, 0, 0);
-    return d;
-  }
-  function setLocalTimer(key, when, cb){
-    const delta = when.getTime() - Date.now();
-    if (delta <= 0){ cb(); return; }
-    const to = setTimeout(cb, Math.min(delta, 0x7fffffff));
-    state.timers.set(key, to);
-  }
-  function clearAllTimers(){
-    for (const to of state.timers.values()) clearTimeout(to);
-    state.timers.clear();
-  }
-  function showNow(e, type){
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
-    const body = buildBody(e, type==='start' ? ('Algus: ' + timeStrFromMinutes(e.startMin)) : ('Lõpp: ' + timeStrFromMinutes(e.endMin)));
-    const n = new Notification('R‑kalender', { body, tag: \`\${type}-\${e.id}\` });
-    if (state.settings.soundOn){ try { playBeep(); } catch {} }
-    n.onclick = ()=> window.focus();
-  }
-  function playBeep(){
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type = 'sine';
-    const now = ctx.currentTime;
-    o.frequency.setValueAtTime(880, now);
-    g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(0.3, now+0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, now+0.6);
-    o.start(now);
-    o.stop(now+0.62);
-  }
+            function loadState() {
+                const savedState = localStorage.getItem('rCalendarState');
+                if (savedState) {
+                    const loadedState = JSON.parse(savedState);
+                    loadedState.rows = Math.max(INITIAL_ROWS, loadedState.rows || INITIAL_ROWS);
+                    state = loadedState;
+                }
+            }
 
-  // Install (A2HS) voog
-  window.addEventListener('beforeinstallprompt', (e)=>{
-    e.preventDefault();
-    state.installPromptEvent = e;
-    $('#btnInstall').style.display = 'inline-block';
-  });
-  $('#btnInstall').addEventListener('click', async ()=>{
-    if (state.installPromptEvent){
-      state.installPromptEvent.prompt();
-      const choice = await state.installPromptEvent.userChoice;
-      if (choice.outcome === 'accepted'){
-        $('#btnInstall').textContent = 'Lisatud';
-      }
-      state.installPromptEvent = null;
-    } else {
-      alert('Lisa avaekraanile: Chrome -> 3 täppi -> Lisa avalehele');
-    }
-  });
+            // --- CALENDAR RENDERING ---
+            function renderCalendar() {
+                calendarGrid.innerHTML = '';
+                const today = new Date();
+                const todayIndex = today.getDay(); // Sunday - 0, Monday - 1...
 
-  // CRUD
-  function addEventFromForm(evt){
-    evt.preventDefault();
-    const title = $('#title').value.trim();
-    if (!title) return;
-    const dayIndex = Number($('#day').value);
-    const startMin = minutesFromTimeStr($('#start').value);
-    const endMin = minutesFromTimeStr($('#end').value);
-    if (endMin!=null && endMin < startMin){
-      alert('Lõppaeg peab olema hiljem kui algusaeg.');
-      return;
-    }
-    const color = ($('input[name="color"]:checked')?.value)||'blue';
-    const notifyStart = $('#notifyStart').checked;
-    const notifyEnd = $('#notifyEnd').checked;
-    const notes = $('#notes').value.trim();
-    const id = (crypto?.randomUUID?.() || String(Date.now())+Math.random().toString(16).slice(2));
-    const wsISO = dateToISO(getWeekStart());
-    const e = { id, title, notes, color, dayIndex, startMin, endMin, notifyStart, notifyEnd, weekStartISO: wsISO };
-    state.events.push(e);
-    save();
-    renderCalendar();
-    scheduleForEvent(e);
-    $('#eventForm').reset();
-  }
-  function editEvent(id){
-    const e = state.events.find(x=>x.id===id);
-    if (!e) return;
-    $('#title').value = e.title;
-    $('#day').value = String(e.dayIndex);
-    $('#start').value = timeStrFromMinutes(e.startMin);
-    $('#end').value = e.endMin!=null ? timeStrFromMinutes(e.endMin) : '';
-    const radio = document.querySelector(\`#colorGroup input[value="\${e.color}"]\`);
-    if (radio) radio.checked = true;
-    $('#notifyStart').checked = !!e.notifyStart;
-    $('#notifyEnd').checked = !!e.notifyEnd;
-    $('#notes').value = e.notes || '';
-    const btn = $('#eventForm .btn.primary');
-    btn.textContent = 'Uuenda';
-    const onSubmit = (ev)=>{
-      ev.preventDefault();
-      e.title = $('#title').value.trim();
-      e.dayIndex = Number($('#day').value);
-      e.startMin = minutesFromTimeStr($('#start').value);
-      e.endMin = minutesFromTimeStr($('#end').value);
-      e.color = ($('input[name="color"]:checked')?.value)||'blue';
-      e.notifyStart = $('#notifyStart').checked;
-      e.notifyEnd = $('#notifyEnd').checked;
-      e.notes = $('#notes').value.trim();
-      save();
-      renderCalendar();
-      scheduleAll();
-      $('#eventForm').reset();
-      btn.textContent = 'Lisa';
-      $('#eventForm').removeEventListener('submit', onSubmit);
-      $('#eventForm').addEventListener('submit', addEventFromForm, { once:true });
-    };
-    $('#eventForm').removeEventListener('submit', addEventFromForm);
-    $('#eventForm').addEventListener('submit', onSubmit, { once:true });
-  }
-  function deleteEvent(id){
-    const idx = state.events.findIndex(x=>x.id===id);
-    if (idx<0) return;
-    state.events.splice(idx,1);
-    save();
-    renderCalendar();
-    scheduleAll();
-  }
+                calendarGrid.appendChild(document.createElement('div'));
 
-  // Seaded
-  function loadSettingsToUI(){
-    $('#weekEmoji').textContent = state.settings.weekEmoji || '📅';
-    $('#weekEmojiSelect').value = state.settings.weekEmoji || '📅';
-    $('#weekNote').value = state.settings.weekNote || '';
-    $('#soundOn').checked = !!state.settings.soundOn;
-  }
-  function bindSettings(){
-    $('#weekEmojiSelect').addEventListener('change', ()=>{
-      state.settings.weekEmoji = $('#weekEmojiSelect').value;
-      $('#weekEmoji').textContent = state.settings.weekEmoji;
-      save();
-    });
-    $('#weekNote').addEventListener('input', ()=>{
-      state.settings.weekNote = $('#weekNote').value.slice(0,120);
-      save();
-    });
-    $('#soundOn').addEventListener('change', ()=>{
-      state.settings.soundOn = $('#soundOn').checked;
-      save();
-    });
-  }
+                for (let i = 0; i < 7; i++) {
+                    const dayIndex = (todayIndex + i) % 7;
+                    const dayDate = new Date();
+                    dayDate.setDate(today.getDate() + i);
+                    
+                    const header = document.createElement('div');
+                    header.className = 'day-header text-center font-bold p-1 rounded-md text-xs sm:text-base';
+                    header.innerHTML = `${WEEKDAYS[dayIndex]}<br>${dayDate.getDate()}`;
+                    if (i === 0) {
+                        header.classList.add('today');
+                    }
+                    calendarGrid.appendChild(header);
+                }
+                
+                for (let r = 0; r < state.rows; r++) {
+                    const timeLabel = document.createElement('div');
+                    timeLabel.className = 'text-center text-xs text-gray-500 dark:text-slate-400 self-center';
+                    calendarGrid.appendChild(timeLabel);
 
-  function updateNotifyBtn(){
-    const b = $('#btnNotify');
-    if (!('Notification' in window)) { b.disabled=true; b.textContent='Teavitused mitte toetatud'; return; }
-    if (Notification.permission === 'granted'){ b.textContent = 'Teavitused lubatud'; b.disabled=true; }
-    else { b.textContent = 'Luba teavitused'; b.disabled=false; }
-  }
+                    for (let d = 0; d < 7; d++) {
+                        const slotId = `${d}-${r}`;
+                        const slot = document.createElement('div');
+                        slot.className = 'calendar-slot h-20 bg-white dark:bg-slate-800 rounded-lg shadow-md cursor-pointer flex flex-col items-center justify-center text-center p-1 overflow-hidden hover:ring-2 ring-blue-500 transition-all';
+                        slot.dataset.slotId = slotId;
+                        
+                        const event = state.events[slotId];
+                        if (event) {
+                           const isLightColor = ['yellow', 'pink'].includes(event.color);
+                           const textColorClass = isLightColor ? 'text-black' : 'text-white';
+                           const timeColorClass = isLightColor ? 'text-gray-600' : 'text-slate-200';
 
-  // Service worker (Blobina, et ühe failina töötaks)
-  async function registerSW(){
-    if (!('serviceWorker' in navigator)) return;
-    const swSource = `
-      const CACHE_NAME='rkalender-v1';
-      self.addEventListener('install', e=>{
-        e.waitUntil((async()=>{
-          const c = await caches.open(CACHE_NAME);
-          try { await c.addAll([ self.registration.scope ]); } catch(e){}
-          self.skipWaiting();
-        })());
-      });
-      self.addEventListener('activate', e=>{
-        e.waitUntil((async()=>{
-          const keys=await caches.keys();
-          await Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)));
-          self.clients.claim();
-        })());
-      });
-      self.addEventListener('fetch', e=>{
-        const req = e.request;
-        e.respondWith((async()=>{
-          const cached = await caches.match(req);
-          if (cached) return cached;
-          try { return await fetch(req); }
-          catch { return caches.match(self.registration.scope); }
-        })());
-      });
-      self.addEventListener('notificationclick', (event)=>{
-        event.notification.close();
-        event.waitUntil((async ()=>{
-          const allClients = await clients.matchAll({ type:'window', includeUncontrolled:true });
-          const url = self.registration.scope;
-          const client = allClients.find(c => c.url.startsWith(url));
-          if (client){ client.focus(); client.postMessage({ type:'focus' }); }
-          else { await clients.openWindow(url); }
-        })());
-      });
-    `;
-    try{
-      const url = URL.createObjectURL(new Blob([swSource], { type: 'text/javascript' }));
-      const reg = await navigator.serviceWorker.register(url);
-      console.log('SW registreeritud', reg.scope);
-    }catch(e){
-      console.warn('SW viga', e);
-    }
-  }
+                           slot.innerHTML = `
+                                <div class="text-3xl">${event.emoji || ''}</div>
+                                <div class="text-xs font-semibold leading-tight">${event.text || ''}</div>
+                                <div class="text-xxs mt-1 ${timeColorClass}">${event.startTime || ''} - ${event.endTime || ''}</div>
+                            `;
+                            slot.classList.remove('bg-white', 'dark:bg-slate-800');
+                            slot.classList.add(COLORS[event.color] || 'bg-gray-200');
+                            slot.classList.add(textColorClass);
+                        }
+                        
+                        calendarGrid.appendChild(slot);
+                    }
+                }
+                deleteRowBtn.classList.toggle('hidden', state.rows <= INITIAL_ROWS);
+            }
 
-  async function requestPersistent(){
-    if (navigator.storage && navigator.storage.persist){
-      try { await navigator.storage.persist(); } catch {}
-    }
-  }
-  function initDayDefaults(){
-    const start = $('#start');
-    const now = new Date();
-    start.value = \`\${pad2(now.getHours())}:\${pad2(Math.floor(now.getMinutes()/5)*5)}\`;
-  }
-  function bindUI(){
-    $('#btnNotify').addEventListener('click', requestNotificationPermission);
-    $('#eventForm').addEventListener('submit', addEventFromForm);
-    $('#resetForm').addEventListener('click', ()=>$('#eventForm').reset());
-  }
+            function addRow() {
+                state.rows++;
+                renderCalendar();
+                saveState();
+            }
 
-  (async function main(){
-    await registerSW();
-    await requestPersistent();
-    load();
-    buildDaySelect();
-    renderWeekRange();
-    renderCalendar();
-    loadSettingsToUI();
-    bindSettings();
-    bindUI();
-    initDayDefaults();
-    updateNotifyBtn();
-    scheduleAll();
-  })();
+            function deleteRow() {
+                if (state.rows > INITIAL_ROWS) {
+                    state.rows--;
+                    for (let d = 0; d < 7; d++) {
+                        const slotId = `${d}-${state.rows}`;
+                        if (state.events[slotId]) {
+                            delete state.events[slotId];
+                        }
+                    }
+                    renderCalendar();
+                    saveState();
+                }
+            }
 
-  setInterval(()=>{
-    const wsNow = dateToISO(getWeekStart());
-    const lastWs = (state.events[0]?.weekStartISO) || localStorage.getItem('rk_last_ws');
-    if (lastWs !== wsNow){
-      localStorage.setItem('rk_last_ws', wsNow);
-      load();
-      buildDaySelect();
-      renderWeekRange();
-      renderCalendar();
-      loadSettingsToUI();
-      scheduleAll();
-    }
-  }, 60*1000);
 
-  navigator.serviceWorker?.addEventListener?.('message', (e)=>{
-    if (e?.data?.type==='focus') window.focus();
-  });
-  </script>
+            // --- MODAL & EVENT HANDLING ---
+            function openModal(slotId) {
+                currentEditingSlot = slotId;
+                const event = state.events[slotId];
+                
+                eventText.value = '';
+                eventStartTime.value = '';
+                eventEndTime.value = '';
+                notificationTime.value = '';
+                document.querySelectorAll('#color-picker .selected, #emoji-picker .selected').forEach(el => el.classList.remove('selected'));
+
+                if (event) {
+                    document.getElementById('modal-title').textContent = 'Muuda Sündmust';
+                    eventText.value = event.text || '';
+                    eventStartTime.value = event.startTime || '';
+                    eventEndTime.value = event.endTime || '';
+                    notificationTime.value = event.notificationTime || '';
+                    if (event.color) document.querySelector(`#color-picker [data-color="${event.color}"]`).classList.add('selected');
+                    if (event.emoji) document.querySelector(`#emoji-picker [data-emoji="${event.emoji}"]`).classList.add('selected');
+                    deleteBtn.classList.remove('hidden');
+                } else {
+                    document.getElementById('modal-title').textContent = 'Lisa Sündmus';
+                    deleteBtn.classList.add('hidden');
+                }
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                }, 10);
+            }
+
+            function closeModal() {
+                modalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 200);
+            }
+
+            function saveEvent() {
+                const selectedColorEl = document.querySelector('#color-picker .selected');
+                const selectedEmojiEl = document.querySelector('#emoji-picker .selected');
+
+                const eventData = {
+                    text: eventText.value,
+                    startTime: eventStartTime.value,
+                    endTime: eventEndTime.value,
+                    notificationTime: notificationTime.value,
+                    color: selectedColorEl ? selectedColorEl.dataset.color : 'blue',
+                    emoji: selectedEmojiEl ? selectedEmojiEl.dataset.emoji : '',
+                };
+
+                state.events[currentEditingSlot] = eventData;
+                
+                if (eventData.notificationTime) {
+                    scheduleNotification(eventData, currentEditingSlot);
+                } else {
+                    cancelNotification(currentEditingSlot);
+                }
+
+                saveState();
+                renderCalendar();
+                closeModal();
+            }
+
+            function deleteEvent() {
+                delete state.events[currentEditingSlot];
+                cancelNotification(currentEditingSlot);
+                saveState();
+                renderCalendar();
+                closeModal();
+            }
+
+            // --- PICKERS (Color & Emoji) ---
+            function setupPickers() {
+                Object.entries(COLORS).forEach(([name, className]) => {
+                    const span = document.createElement('span');
+                    span.className = `w-8 h-8 rounded-full cursor-pointer ${className} shadow-inner`;
+                    span.dataset.color = name;
+                    colorPicker.appendChild(span);
+                });
+
+                EMOJIS.forEach(emoji => {
+                    const button = document.createElement('button');
+                    button.className = 'text-2xl rounded-lg p-1 hover:bg-gray-200 dark:hover:bg-slate-600';
+                    button.textContent = emoji;
+                    button.dataset.emoji = emoji;
+                    emojiPicker.appendChild(button);
+                });
+            }
+
+            function handlePickerSelection(e, containerId) {
+                const container = document.getElementById(containerId);
+                const target = e.target.closest('[data-color], [data-emoji]');
+                if (!target) return;
+                
+                const currentSelected = container.querySelector('.selected');
+                if (currentSelected) {
+                    currentSelected.classList.remove('selected');
+                }
+                if (currentSelected !== target) {
+                    target.classList.add('selected');
+                }
+            }
+            
+            // --- NOTIFICATIONS ---
+            function requestNotificationPermission() {
+                if ('Notification' in window) {
+                    Notification.requestPermission().then(permission => {
+                        if (permission !== 'granted') console.log('Notification permission denied.');
+                    });
+                }
+            }
+
+            function scheduleNotification(event, slotId) {
+                cancelNotification(slotId); 
+                if (Notification.permission !== 'granted' || !event.notificationTime) return;
+                
+                const [hours, minutes] = event.notificationTime.split(':').map(Number);
+                const now = new Date();
+                const dayOffset = parseInt(slotId.split('-')[0]);
+
+                let notificationDate = new Date();
+                notificationDate.setDate(now.getDate() + dayOffset);
+                notificationDate.setHours(hours, minutes, 0, 0);
+
+                if (notificationDate < now) {
+                    notificationDate.setDate(notificationDate.getDate() + 7);
+                }
+
+                const delay = notificationDate.getTime() - now.getTime();
+                
+                if (delay > 0) {
+                    const timeoutId = setTimeout(() => {
+                        showNotification(event.text);
+                        scheduleNotification(event, slotId);
+                    }, delay);
+                    scheduledNotifications[slotId] = timeoutId;
+                }
+            }
+
+            function showNotification(text) {
+                new Notification('R Kalender Meeldetuletus', {
+                    body: text,
+                    icon: 'https://placehold.co/192x192/000000/ffffff?text=R',
+                });
+                playNotificationSound();
+            }
+            
+            function cancelNotification(slotId) {
+                if (scheduledNotifications[slotId]) {
+                    clearTimeout(scheduledNotifications[slotId]);
+                    delete scheduledNotifications[slotId];
+                }
+            }
+            
+            function playNotificationSound() {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                const synth = new Tone.Synth().toDestination();
+                synth.triggerAttackRelease("C5", "8n");
+            }
+            
+            // --- EVENT LISTENERS ---
+            function setupEventListeners() {
+                themeToggle.addEventListener('click', toggleTheme);
+                addRowBtn.addEventListener('click', addRow);
+                deleteRowBtn.addEventListener('click', deleteRow);
+                calendarGrid.addEventListener('click', (e) => {
+                    const slot = e.target.closest('.calendar-slot');
+                    if (slot) openModal(slot.dataset.slotId);
+                });
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+                saveBtn.addEventListener('click', saveEvent);
+                cancelBtn.addEventListener('click', closeModal);
+                deleteBtn.addEventListener('click', deleteEvent);
+                colorPicker.addEventListener('click', (e) => handlePickerSelection(e, 'color-picker'));
+                emojiPicker.addEventListener('click', (e) => handlePickerSelection(e, 'emoji-picker'));
+            }
+
+            init();
+        });
+    </script>
+
 </body>
 </html>
+
