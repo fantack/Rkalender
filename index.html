@@ -4,18 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>R Kalender</title>
-    
-    <!-- Tab Logo (Favicon) -->
+
+    <!-- Favicon / Tab icon -->
     <link rel="icon" type="image/jpeg" href="https://i.pinimg.com/736x/f2/fb/f9/f2fbf9b2b87779184468e89cc82bfeb4.jpg">
-    
-    <!-- Tailwind CSS -->
+    <link rel="shortcut icon" type="image/jpeg" href="https://i.pinimg.com/736x/f2/fb/f9/f2fbf9b2b87779184468e89cc82bfeb4.jpg">
+    <link rel="apple-touch-icon" href="https://i.pinimg.com/736x/f2/fb/f9/f2fbf9b2b87779184468e89cc82bfeb4.jpg">
+    <meta name="color-scheme" content="light dark">
+
+    <!-- Tailwind CSS (dark mode via class) -->
+    <script>
+      tailwind.config = { darkMode: 'class' };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Tone.js for custom sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
 
     <!-- Web App Manifest (for "Add to Home Screen") -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlIgS2FsZW5kZXIiLAogICJzaG9ydF9uYW1lIjogIlJLYWxlbmRlciIsCiAgImRlc2NyaXB0aW9uIjogIkhlcHBmbiB3ZWVrbHkgcGxhbm5lciIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvMDAwMDAwL2ZmZmZmZj90ZXh0PVLwn5OKIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vcGxhY2Vob2xkLmNvLzUxMng1MTIvMDAwMDAwL2ZmZmZmZj90ZXh0PVLwn5OKIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXSwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJ0aGVtZV9jb2xvciI6ICIjMWYyOTM3IiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGUxNzI1Igp9">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlIgS2FsZW5kZXIiLAogICJzaG9ydF9uYW1lIjogIlJLYWxlbmRlciIsCiAgImRlc2NyaXB0aW9uIjogIkhlcHBmbiB3ZWVrbHkgcGxhbm5lciIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vaS5waW5pbWcuY29tLzczNngvZjIvZmIvZjkvZjJmYmY5YjJiODc3NzkxODQ0NjhlODljYzgyYmZlYjQuanBnIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9qcGVnIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2kucGluaW1nLmNvbS83MzZ4L2YyL2ZiL2Y5L2YyZmJmOWIyYjg3Nzc5MTg0NDY4ZTg5Y2M4MmJmZWI0LmpwZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvanBlZyIKICAgIH0KICBdLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgInRoZW1lX2NvbG9yIjogIiMxZjI5MzciLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZTE3MjUiCn0=">
 
     <style>
         /* Custom styles for better look and feel */
@@ -30,27 +36,32 @@
             grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
             gap: 0.5rem;
         }
-        .color-picker span {
+
+        /* FIX: kasutame ID selektoreid (#color-picker ja #emoji-picker), mitte klasse */
+        #color-picker span {
             transition: transform 0.2s ease;
         }
-        .color-picker span.selected {
+        #color-picker span.selected {
             transform: scale(1.2);
             outline: 3px solid #3b82f6; /* blue-500 */
+            outline-offset: 2px;
         }
-        html.dark .color-picker span.selected {
+        html.dark #color-picker span.selected {
              outline-color: #60a5fa; /* blue-400 */
         }
-        .emoji-picker button {
+        #emoji-picker button {
             transition: transform 0.2s ease, outline 0.2s ease;
         }
-        .emoji-picker button.selected {
+        #emoji-picker button.selected {
             outline: 3px solid #3b82f6; /* blue-500 */
+            outline-offset: 2px;
             border-radius: 8px;
             transform: scale(1.1);
         }
-        html.dark .emoji-picker button.selected {
+        html.dark #emoji-picker button.selected {
             outline-color: #60a5fa; /* blue-400 */
         }
+
         .day-header.today {
             background-color: #fbbf24; /* Amber 400 */
             color: #1f2937;
@@ -234,19 +245,12 @@
             
             // --- THEME ---
             function setupTheme() {
-                if (state.theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                    themeToggleIndicator.classList.add('dark:translate-x-6');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    themeToggleIndicator.classList.remove('dark:translate-x-6');
-                }
+                document.documentElement.classList.toggle('dark', state.theme === 'dark');
             }
 
             function toggleTheme() {
                 state.theme = state.theme === 'dark' ? 'light' : 'dark';
-                document.documentElement.classList.toggle('dark');
-                themeToggleIndicator.classList.toggle('dark:translate-x-6');
+                document.documentElement.classList.toggle('dark', state.theme === 'dark');
                 saveState();
             }
 
@@ -357,8 +361,14 @@
                     eventStartTime.value = event.startTime || '';
                     eventEndTime.value = event.endTime || '';
                     notificationTime.value = event.notificationTime || '';
-                    if (event.color) document.querySelector(`#color-picker [data-color="${event.color}"]`).classList.add('selected');
-                    if (event.emoji) document.querySelector(`#emoji-picker [data-emoji="${event.emoji}"]`).classList.add('selected');
+                    if (event.color) {
+                        const colorEl = document.querySelector(`#color-picker [data-color="${event.color}"]`);
+                        if (colorEl) colorEl.classList.add('selected');
+                    }
+                    if (event.emoji) {
+                        const emojiEl = document.querySelector(`#emoji-picker [data-emoji="${event.emoji}"]`);
+                        if (emojiEl) emojiEl.classList.add('selected');
+                    }
                     deleteBtn.classList.remove('hidden');
                 } else {
                     document.getElementById('modal-title').textContent = 'Lisa Sündmus';
@@ -416,13 +426,14 @@
             function setupPickers() {
                 Object.entries(COLORS).forEach(([name, className]) => {
                     const span = document.createElement('span');
-                    span.className = `w-8 h-8 rounded-full cursor-pointer ${className} shadow-inner`;
+                    span.className = `inline-block w-8 h-8 rounded-full cursor-pointer ${className} shadow-inner`;
                     span.dataset.color = name;
                     colorPicker.appendChild(span);
                 });
 
                 EMOJIS.forEach(emoji => {
                     const button = document.createElement('button');
+                    button.type = 'button';
                     button.className = 'text-2xl rounded-lg p-1 hover:bg-slate-200 dark:hover:bg-slate-600';
                     button.textContent = emoji;
                     button.dataset.emoji = emoji;
@@ -459,7 +470,7 @@
                 
                 const [hours, minutes] = event.notificationTime.split(':').map(Number);
                 const now = new Date();
-                const dayOffset = parseInt(slotId.split('-')[0]);
+                const dayOffset = parseInt(slotId.split('-')[0], 10);
 
                 let notificationDate = new Date();
                 notificationDate.setDate(now.getDate() + dayOffset);
@@ -483,7 +494,7 @@
             function showNotification(text) {
                 new Notification('R Kalender Meeldetuletus', {
                     body: text,
-                    icon: 'https://placehold.co/192x192/000000/ffffff?text=R',
+                    icon: 'https://i.pinimg.com/736x/f2/fb/f9/f2fbf9b2b87779184468e89cc82bfeb4.jpg',
                 });
                 playNotificationSound();
             }
@@ -528,4 +539,5 @@
 
 </body>
 </html>
+
 
