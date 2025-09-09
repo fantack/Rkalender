@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>R Kalender</title>
     
+    <!-- Tab Logo (Favicon) -->
+    <link rel="icon" type="image/jpeg" href="https://i.pinimg.com/736x/f2/fb/f9/f2fbf9b2b87779184468e89cc82bfeb4.jpg">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -38,7 +41,7 @@
              outline-color: #60a5fa; /* blue-400 */
         }
         .emoji-picker button {
-            transition: transform 0.2s ease, background-color 0.2s ease;
+            transition: transform 0.2s ease, outline 0.2s ease;
         }
         .emoji-picker button.selected {
             outline: 3px solid #3b82f6; /* blue-500 */
@@ -61,22 +64,22 @@
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #e5e7eb; /* gray-200 */
+            background: #f1f5f9; /* slate-100 */
             border-radius: 10px;
         }
          html.dark ::-webkit-scrollbar-track {
             background: #1e293b; /* slate-800 */
         }
         ::-webkit-scrollbar-thumb {
-            background: #9ca3af; /* gray-400 */
+            background: #cbd5e1; /* slate-300 */
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280; /* gray-500 */
+            background: #94a3b8; /* slate-400 */
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen overflow-x-hidden font-sans transition-colors duration-300">
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen overflow-x-hidden font-sans transition-colors duration-300">
 
     <div id="app-container" class="max-w-4xl mx-auto p-2 sm:p-4">
         <!-- Header -->
@@ -84,7 +87,7 @@
             <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">R Kalender</h1>
             <div class="flex items-center space-x-2">
                 <span class="text-sm">Hele</span>
-                <button id="theme-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-300 dark:bg-slate-600 focus:outline-none">
+                <button id="theme-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-slate-300 dark:bg-slate-600 focus:outline-none">
                     <span id="theme-toggle-indicator" class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1 dark:translate-x-6"></span>
                 </button>
                 <span class="text-sm">Tume</span>
@@ -118,31 +121,31 @@
                 <!-- Event Text -->
                 <div>
                     <label for="event-text" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Tegevus</label>
-                    <input type="text" id="event-text" placeholder="Nt: Jõusaal" class="mt-1 block w-full bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" id="event-text" placeholder="Nt: Jõusaal" class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 
                 <!-- Time -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label for="event-start-time" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Algus</label>
-                        <input type="time" id="event-start-time" step="300" class="mt-1 block w-full bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <input type="time" id="event-start-time" step="300" class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
                         <label for="event-end-time" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Lõpp</label>
-                        <input type="time" id="event-end-time" step="300" class="mt-1 block w-full bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <input type="time" id="event-end-time" step="300" class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
 
                 <!-- Notification Time -->
                  <div>
                     <label for="notification-time" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Teavituse aeg</label>
-                    <input type="time" id="notification-time" step="300" class="mt-1 block w-full bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="time" id="notification-time" step="300" class="mt-1 block w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
                 <!-- Color Picker -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Värv</label>
-                    <div id="color-picker" class="mt-2 flex justify-around p-2 bg-gray-100 dark:bg-slate-700 rounded-lg">
+                    <div id="color-picker" class="mt-2 flex justify-around p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
                         <!-- Colors will be generated by JS -->
                     </div>
                 </div>
@@ -150,7 +153,7 @@
                 <!-- Emoji Picker -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Ikoon</label>
-                    <div id="emoji-picker" class="mt-2 p-2 bg-gray-100 dark:bg-slate-700 rounded-lg max-h-32 overflow-y-auto emoji-picker-grid">
+                    <div id="emoji-picker" class="mt-2 p-2 bg-slate-100 dark:bg-slate-700 rounded-lg max-h-32 overflow-y-auto emoji-picker-grid">
                         <!-- Emojis will be generated by JS -->
                     </div>
                 </div>
@@ -160,7 +163,7 @@
             <div class="mt-6 flex justify-between">
                 <button id="delete-event-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors hidden">Kustuta</button>
                 <div class="flex-grow flex justify-end space-x-3">
-                     <button id="cancel-event-btn" class="bg-gray-300 hover:bg-gray-400 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-800 dark:text-slate-200 font-bold py-2 px-4 rounded-md shadow-sm transition-colors">Tühista</button>
+                     <button id="cancel-event-btn" class="bg-slate-300 hover:bg-slate-400 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-800 dark:text-slate-200 font-bold py-2 px-4 rounded-md shadow-sm transition-colors">Tühista</button>
                     <button id="save-event-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors">Salvesta</button>
                 </div>
             </div>
@@ -285,13 +288,13 @@
                 
                 for (let r = 0; r < state.rows; r++) {
                     const timeLabel = document.createElement('div');
-                    timeLabel.className = 'text-center text-xs text-gray-500 dark:text-slate-400 self-center';
+                    timeLabel.className = 'text-center text-xs text-slate-500 dark:text-slate-400 self-center';
                     calendarGrid.appendChild(timeLabel);
 
                     for (let d = 0; d < 7; d++) {
                         const slotId = `${d}-${r}`;
                         const slot = document.createElement('div');
-                        slot.className = 'calendar-slot h-20 bg-white dark:bg-slate-800 rounded-lg shadow-md cursor-pointer flex flex-col items-center justify-center text-center p-1 overflow-hidden hover:ring-2 ring-blue-500 transition-all';
+                        slot.className = 'calendar-slot h-20 bg-slate-50 dark:bg-slate-800 rounded-lg shadow-sm cursor-pointer flex flex-col items-center justify-center text-center p-1 overflow-hidden hover:ring-2 ring-blue-500 transition-all';
                         slot.dataset.slotId = slotId;
                         
                         const event = state.events[slotId];
@@ -305,8 +308,8 @@
                                 <div class="text-xs font-semibold leading-tight">${event.text || ''}</div>
                                 <div class="text-xxs mt-1 ${timeColorClass}">${event.startTime || ''} - ${event.endTime || ''}</div>
                             `;
-                            slot.classList.remove('bg-white', 'dark:bg-slate-800');
-                            slot.classList.add(COLORS[event.color] || 'bg-gray-200');
+                            slot.classList.remove('bg-slate-50', 'dark:bg-slate-800');
+                            slot.classList.add(COLORS[event.color] || 'bg-slate-200');
                             slot.classList.add(textColorClass);
                         }
                         
@@ -420,7 +423,7 @@
 
                 EMOJIS.forEach(emoji => {
                     const button = document.createElement('button');
-                    button.className = 'text-2xl rounded-lg p-1 hover:bg-gray-200 dark:hover:bg-slate-600';
+                    button.className = 'text-2xl rounded-lg p-1 hover:bg-slate-200 dark:hover:bg-slate-600';
                     button.textContent = emoji;
                     button.dataset.emoji = emoji;
                     emojiPicker.appendChild(button);
